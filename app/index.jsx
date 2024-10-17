@@ -1,149 +1,54 @@
-import { useState, useRef } from "react";
-import { View, StyleSheet, Text, Image, TouchableOpacity, Alert } from "react-native";
-import { CameraView, useCameraPermissions } from "expo-camera";
-import * as MediaLibrary from "expo-media-library"; 
-import { BarCodeScanner } from 'expo-barcode-scanner';
-import { Linking } from 'react-native';
+import { View, StyleSheet, Text } from "react-native";
+import { Link } from 'expo-router';
 
-export default function Camera() {
-    const [permissao, pedirPermissao] = useCameraPermissions();
-    const [foto, setFoto] = useState(null);
-    const cameraRef = useRef(null);
-    const [ladoCamera, setLadoCamera] = useState('back');
-    const [permissaoSalvar, pedirPermissaoSalvar] = MediaLibrary.usePermissions();
-    const [scanear, setScanear] = useState(false);
-
-    if (!permissao) {
-        return <View />;
-    }
-
-    if (!permissao.granted) {
-        return (
-            <View style={styles.container}>
-                <Text style={styles.textopermissao}>Você precisa permitir o aplicativo acessar sua câmera</Text>
-                <TouchableOpacity style={styles.button} onPress={pedirPermissao}>
-                    <Text style={styles.buttonText}>Pedir Permissão</Text>
-                </TouchableOpacity>
-            </View>
-        );
-    }
-
-    const tirarFoto = async () => {
-        const foto = await cameraRef.current?.takePictureAsync({
-            quality: 0.5,
-            base64: true,
-        });
-        setFoto(foto);
-        console.log(foto);
-    };
-
-    const inverterLadoCamera = () => {
-        setLadoCamera(ladoCamera === 'back' ? 'front' : 'back');
-    };
-
-    const salvarFoto = async () => {
-        if (permissaoSalvar.status !== 'granted') {
-            await pedirPermissaoSalvar();
-        }
-        if (foto && foto.uri) {
-            await MediaLibrary.saveToLibraryAsync(foto.uri);
-            setFoto(null);
-        }
-    };
-
-    const descartarFoto = () => {
-        setFoto(null);
-    };
-
-    const handleBarCodeScanned = async ({ type, data }) => {
-        setScanear(false);
-        const supported = await Linking.canOpenURL(data);
-        if (supported) {
-            await Linking.openURL(data);
-        } else {
-            Alert.alert("Não foi possível abrir o link.");
-        }
-    };
-
-    return (
-        <View style={styles.container}>
-            {foto ? (
-                <View style={styles.previewContainer}>
-                    <Image style={styles.image} source={{ uri: foto.uri }} />
-                    <View style={styles.buttonContainer}>
-                        <TouchableOpacity style={styles.button} onPress={descartarFoto}>
-                            <Text style={styles.buttonText}>Descartar Imagem</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.button} onPress={salvarFoto}>
-                            <Text style={styles.buttonText}>Salvar Foto</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            ) : scanear ? (
-                <BarCodeScanner
-                    onBarCodeScanned={handleBarCodeScanned}
-                    style={StyleSheet.absoluteFillObject}
-                />
-            ) : (
-                <CameraView style={styles.camera} facing={ladoCamera} ref={cameraRef}>
-                    <View style={styles.botaosalvar}>
-                        <TouchableOpacity style={styles.button} onPress={tirarFoto}>
-                            <Text style={styles.buttonText}>Tirar Foto</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.button} onPress={inverterLadoCamera}>
-                            <Text style={styles.buttonText}>Trocar Lado</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.button} onPress={() => setScanear(true)}>
-                            <Text style={styles.buttonText}>Escaneador de Código</Text>
-                        </TouchableOpacity>
-                    </View>
-                </CameraView>
-            )}
-        </View>
-    );
-}
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-    },
-    textopermissao: {
-        textAlign: 'center',
-    },
-    camera: {
-        flex: 1,
-    },
-    previewContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    buttonContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        marginBottom: 20,
-        width: '100%',
-    },
-    botaosalvar: {
-        flex: 1,
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    image: {
-        width: '100%',
-        height: '100%',
-    },
-    button: {
-        backgroundColor: 'yellow',
-        borderRadius: 20,
-        padding: 10,
-        width: '40%',
-        alignItems: 'center',
-    },
-    buttonText: {
-        color: 'black',
-        fontWeight: 'bold',
-    },
+const style = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#282a36', // Cor de fundo escura, estilo moderno
+  },
+  box: {
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    borderRadius: 20,
+    padding: 40,
+    backgroundColor: '#44475a', // Caixa com um fundo roxo escuro
+    elevation: 8,
+  },
+  texto: {
+    fontSize: 34,
+    textAlign: 'center',
+    marginBottom: 25,
+    fontFamily: 'Courier New',
+    fontWeight: 'bold',
+    color: '#ff79c6', // Título com cor rosa vibrante
+    letterSpacing: 2, // Aumenta o espaçamento entre as letras
+  },
+  link: {
+    fontSize: 20,
+    color: '#50fa7b', // Verde neon para os links
+    textDecorationLine: 'none',
+    marginBottom: 20,
+    fontWeight: '600',
+    backgroundColor: '#6272a4', // Fundo dos links com um roxo suave
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    textAlign: 'center',
+  },
 });
+
+export default function Page() {
+  return (
+    <View style={style.container}>
+      <View style={style.box}>
+        <Text style={style.texto}>Atividades</Text>
+        <Link href="/camero" style={style.link}>Camera</Link>
+        <Link href="/memorias" style={style.link}>Memorias</Link>
+      </View>
+    </View>
+  );
+}
